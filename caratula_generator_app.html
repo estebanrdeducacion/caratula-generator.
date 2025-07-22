@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Generador de Carátulas Infantiles</title>
+  <script src="https://cdn.jsdelivr.net/npm/konva@8.4.3/konva.min.js"></script>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+</head>
+<body class="bg-gradient-to-b from-blue-200 to-orange-100 min-h-screen p-6">
+  <div class="max-w-4xl mx-auto">
+    <h1 class="text-3xl font-bold text-center text-blue-800 mb-6">🎨 Generador de Carátulas Infantiles</h1>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div class="space-y-4">
+        <input id="titulo" type="text" placeholder="Título (Ej: UNO, DOS, TRES)" class="w-full p-2 rounded border border-blue-300">
+        <input id="encabezado" type="text" placeholder="Encabezado (Ej: ¿CÓMO SE DICE EN INGLÉS?)" class="w-full p-2 rounded border border-blue-300">
+        <input id="numeros" type="text" placeholder="Texto o Números (Ej: 1 2 3)" class="w-full p-2 rounded border border-blue-300">
+        <input id="imagenInput" type="file" accept="image/*" class="w-full">
+        <button onclick="generarCaratula()" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded w-full">Generar Carátula</button>
+        <a id="descargar" class="hidden bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded w-full text-center" download="caratula.png">Descargar imagen</a>
+      </div>
+
+      <div>
+        <div id="contenedorCanvas" class="border-2 border-blue-300 bg-white rounded-lg overflow-hidden">
+          <div id="canvas" style="width: 576px; height: 384px;"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let stage = new Konva.Stage({
+      container: 'canvas',
+      width: 576,
+      height: 384,
+    });
+    let layer = new Konva.Layer();
+    stage.add(layer);
+
+    function generarCaratula() {
+      layer.destroyChildren();
+
+      const titulo = document.getElementById('titulo').value;
+      const encabezado = document.getElementById('encabezado').value;
+      const numeros = document.getElementById('numeros').value;
+      const file = document.getElementById('imagenInput').files[0];
+
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = function (e) {
+          const img = new Image();
+          img.src = e.target.result;
+          img.onload = function () {
+            const fondo = new Konva.Image({
+              image: img,
+              width: stage.width(),
+              height: stage.height(),
+            });
+            layer.add(fondo);
+            agregarTextos(titulo, encabezado, numeros);
+          }
+        }
+        reader.readAsDataURL(file);
+      } else {
+        agregarTextos(titulo, encabezado, numeros);
+      }
+    }
+
+    function agregarTextos(titulo, encabezado, numeros) {
+      const textEncabezado = new Konva.Text({
+        text: encabezado,
+        x: 20,
+        y: 20,
+        width: stage.width() - 40,
+        fontSize: 24,
+        fontStyle: 'bold',
+        fontFamily: 'Arial',
+        fill: '#003366',
+        align: 'center',
+      });
+      const textTitulo = new Konva.Text({
+        text: titulo,
+        x: 20,
+        y: stage.height() - 70,
+        width: stage.width() - 40,
+        fontSize: 28,
+        fontStyle: 'bold',
+        fontFamily: 'Arial',
+        fill: '#FFD700',
+        align: 'center',
+        shadowColor: '#000',
+        shadowBlur: 5,
+        shadowOffset: { x: 2, y: 2 },
+        shadowOpacity: 0.5,
+      });
+      const textNumeros = new Konva.Text({
+        text: numeros,
+        x: 20,
+        y: stage.height() / 2 - 20,
+        width: stage.width() - 40,
+        fontSize: 36,
+        fontStyle: 'bold',
+        fontFamily: 'Arial',
+        fill: '#0077CC',
+        align: 'center',
+      });
+
+      layer.add(textEncabezado);
+      layer.add(textNumeros);
+      layer.add(textTitulo);
+      layer.draw();
+
+      document.getElementById('descargar').classList.remove('hidden');
+      document.getElementById('descargar').onclick = function () {
+        const dataURL = stage.toDataURL();
+        this.href = dataURL;
+      }
+    }
+  </script>
+</body>
+</html>
